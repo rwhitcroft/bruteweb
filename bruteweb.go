@@ -11,6 +11,7 @@ import (
 type Config struct {
 	extension   string
 	http_client *http.Client
+	method      string
 	num_threads int
 	recursive   bool
 	url         string
@@ -19,17 +20,23 @@ type Config struct {
 var config Config
 
 func ParseCmdLine() {
-	help_requested := false
-	flag.BoolVar(&help_requested, "h", false, "Show usage")
+	method_head := false
+
+	flag.BoolVar(&method_head, "H", false, "Use HEAD instead of GET")
 	flag.StringVar(&config.url, "u", "", "Base URL (e.g., https://example.com:8443/dir/)")
 	flag.BoolVar(&config.recursive, "r", false, "Recurse into subdirectories")
 	flag.IntVar(&config.num_threads, "t", 4, "Number of worker threads")
 	flag.StringVar(&config.extension, "x", "", "Add this file extension to all guesses")
 	flag.Parse()
 
-	if help_requested || config.url == "" {
+	if config.url == "" {
 		flag.Usage()
-		panic("Invalid input parameters")
+		panic("Base URL not specified (-u)")
+	}
+
+	config.method = "GET"
+	if method_head {
+		config.method = "HEAD"
 	}
 
 	if config.recursive && config.extension != "" {
@@ -61,7 +68,7 @@ func main() {
 		base_url := urls[0]
 		urls = urls[1:]
 
-		fmt.Println("Scanning base URL", base_url.Flatten())
+		fmt.Println("Scanning base URL:", base_url.Flatten())
 
 		words := make(chan string, config.num_threads)
 		results := make(chan *Url)
@@ -96,7 +103,7 @@ func main() {
 			for result := range results {
 				print_status(result)
 				if result.status_code != http.StatusNotFound {
-					print_hit(result)
+					result.Report()
 				}
 
 				if config.recursive && result.status_code == http.StatusOK {
@@ -116,4 +123,8 @@ func main() {
 	}
 
 	fmt.Println("\r" + CLEAR_EOL)
+}
+
+func print_status(u *Url) {
+    fmt.Print("\r" + u.Flatten() + CLEAR_EOL)
 }

@@ -8,6 +8,14 @@ import (
 	"strings"
 )
 
+const (
+    COLOR_RED   = "\033[31m"
+    COLOR_GREEN = "\033[32m"
+    COLOR_CYAN  = "\033[36m"
+    COLOR_RESET = "\033[0m"
+    CLEAR_EOL   = "\033[K"
+)
+
 type Url struct {
 	fqdn        string
 	path        []string
@@ -28,7 +36,7 @@ func (u *Url) Clone(dir string) *Url {
 }
 
 func (u *Url) Fetch() {
-	req, err := http.NewRequest("HEAD", u.Flatten(), nil)
+	req, err := http.NewRequest(config.method, u.Flatten(), nil)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -45,6 +53,26 @@ func (u *Url) Fetch() {
 	if u.status_code == http.StatusFound || u.status_code == http.StatusMovedPermanently {
 		u.location = resp.Header["Location"][0]
 	}
+}
+
+func (u *Url) Report() {
+    var color string
+    var location string
+
+    switch u.status_code {
+    case http.StatusOK:
+        color = COLOR_GREEN
+    case http.StatusFound, http.StatusMovedPermanently:
+        color = COLOR_CYAN
+    default:
+        color = COLOR_RED
+    }
+
+    if u.location != "" {
+        location = " -> " + u.location
+    }
+
+    fmt.Println("\r" + color + strconv.Itoa(u.status_code) + " " + COLOR_RESET + u.Flatten() + location + CLEAR_EOL)
 }
 
 func (u *Url) Flatten() string {
@@ -67,13 +95,7 @@ func (u *Url) Flatten() string {
 }
 
 func NewUrl(proto string, fqdn string, port int, path []string) *Url {
-	url := new(Url)
-	url.proto = proto
-	url.fqdn = fqdn
-	url.port = port
-	url.path = path
-
-	return url
+	return &Url{proto: proto, fqdn: fqdn, port: port, path: path}
 }
 
 func ParseURL(url string) *Url {
@@ -101,3 +123,4 @@ func ParseURL(url string) *Url {
 
 	return NewUrl(proto, fqdn, port, dirs)
 }
+
