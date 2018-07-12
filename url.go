@@ -9,20 +9,20 @@ import (
 )
 
 const (
-    COLOR_RED   = "\033[31m"
-    COLOR_GREEN = "\033[32m"
-    COLOR_CYAN  = "\033[36m"
-    COLOR_RESET = "\033[0m"
-    CLEAR_EOL   = "\033[K"
+	COLOR_RED   = "\033[31m"
+	COLOR_GREEN = "\033[32m"
+	COLOR_CYAN  = "\033[36m"
+	COLOR_RESET = "\033[0m"
+	CLEAR_EOL   = "\033[K"
 )
 
 type Url struct {
-	fqdn        string
-	path        []string
-	port        int
-	proto       string
-	location    string
-	status_code int
+	fqdn       string
+	location   string
+	path       []string
+	port       int
+	proto      string
+	statusCode int
 }
 
 func (u *Url) AddPathItem(dir string) {
@@ -36,43 +36,43 @@ func (u *Url) Clone(dir string) *Url {
 }
 
 func (u *Url) Fetch() {
-	req, err := http.NewRequest(config.method, u.Flatten(), nil)
+	req, err := http.NewRequest("GET", u.Flatten(), nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	resp, err := config.http_client.Do(req)
+	resp, err := config.httpClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer resp.Body.Close()
 
-	u.status_code = resp.StatusCode
-	if u.status_code == http.StatusFound || u.status_code == http.StatusMovedPermanently {
+	u.statusCode = resp.StatusCode
+	if u.statusCode == http.StatusFound || u.statusCode == http.StatusMovedPermanently {
 		u.location = resp.Header["Location"][0]
 	}
 }
 
 func (u *Url) Report() {
-    var color string
-    var location string
+	var color string
+	var location string
 
-    switch u.status_code {
-    case http.StatusOK:
-        color = COLOR_GREEN
-    case http.StatusFound, http.StatusMovedPermanently:
-        color = COLOR_CYAN
-    default:
-        color = COLOR_RED
-    }
+	switch u.statusCode {
+	case http.StatusOK:
+		color = COLOR_GREEN
+	case http.StatusFound, http.StatusMovedPermanently:
+		color = COLOR_CYAN
+	default:
+		color = COLOR_RED
+	}
 
-    if u.location != "" {
-        location = " -> " + u.location
-    }
+	if u.location != "" {
+		location = " -> " + u.location
+	}
 
-    fmt.Println("\r" + color + strconv.Itoa(u.status_code) + " " + COLOR_RESET + u.Flatten() + location + CLEAR_EOL)
+	fmt.Println("\r" + color + strconv.Itoa(u.statusCode) + " " + COLOR_RESET + u.Flatten() + location + CLEAR_EOL)
 }
 
 func (u *Url) Flatten() string {
@@ -123,4 +123,3 @@ func ParseURL(url string) *Url {
 
 	return NewUrl(proto, fqdn, port, dirs)
 }
-

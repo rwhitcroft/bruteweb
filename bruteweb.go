@@ -9,34 +9,25 @@ import (
 )
 
 type Config struct {
-	extension   string
-	http_client *http.Client
-	method      string
-	num_threads int
-	recursive   bool
-	url         string
+	extension  string
+	httpClient *http.Client
+	numThreads int
+	recursive  bool
+	url        string
 }
 
 var config Config
 
 func ParseCmdLine() {
-	method_head := false
-
-	flag.BoolVar(&method_head, "H", false, "Use HEAD instead of GET")
 	flag.StringVar(&config.url, "u", "", "Base URL (e.g., https://example.com:8443/dir/)")
 	flag.BoolVar(&config.recursive, "r", false, "Recurse into subdirectories")
-	flag.IntVar(&config.num_threads, "t", 4, "Number of worker threads")
+	flag.IntVar(&config.numThreads, "t", 4, "Number of worker threads")
 	flag.StringVar(&config.extension, "x", "", "Add this file extension to all guesses")
 	flag.Parse()
 
 	if config.url == "" {
 		flag.Usage()
 		panic("Base URL not specified (-u)")
-	}
-
-	config.method = "GET"
-	if method_head {
-		config.method = "HEAD"
 	}
 
 	if config.recursive && config.extension != "" {
@@ -52,7 +43,7 @@ func ParseCmdLine() {
 func main() {
 	ParseCmdLine()
 
-	config.http_client = &http.Client{
+	config.httpClient = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
@@ -65,20 +56,20 @@ func main() {
 	urls = append(urls, ParseURL(config.url))
 
 	for len(urls) > 0 {
-		base_url := urls[0]
+		base := urls[0]
 		urls = urls[1:]
 
-		fmt.Println("Scanning base URL:", base_url.Flatten())
+		fmt.Println("Scanning base URL:", base.Flatten())
 
-		words := make(chan string, config.num_threads)
+		words := make(chan string, config.numThreads)
 		results := make(chan *Url)
 
 		var wg_producers sync.WaitGroup
 		var wg_consumers sync.WaitGroup
-		wg_producers.Add(config.num_threads)
+		wg_producers.Add(config.numThreads)
 		wg_consumers.Add(1)
 
-		for i := 0; i < config.num_threads; i++ {
+		for i := 0; i < config.numThreads; i++ {
 			go func() {
 				defer wg_producers.Done()
 				for {
@@ -91,7 +82,7 @@ func main() {
 						word += "." + config.extension
 					}
 
-					url := base_url.Clone(word)
+					url := base.Clone(word)
 					url.Fetch()
 					results <- url
 				}
@@ -102,11 +93,11 @@ func main() {
 			defer wg_consumers.Done()
 			for result := range results {
 				print_status(result)
-				if result.status_code != http.StatusNotFound {
+				if result.statusCode != http.StatusNotFound {
 					result.Report()
 				}
 
-				if config.recursive && result.status_code == http.StatusOK {
+				if config.recursive && result.statusCode == http.StatusOK {
 					urls = append(urls, result)
 				}
 			}
@@ -126,5 +117,5 @@ func main() {
 }
 
 func print_status(u *Url) {
-    fmt.Print("\r" + u.Flatten() + CLEAR_EOL)
+	fmt.Print("\r" + u.Flatten() + CLEAR_EOL)
 }
