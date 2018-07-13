@@ -42,6 +42,8 @@ func (u *Url) Fetch() {
 		return
 	}
 
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)")
+
 	resp, err := config.httpClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
