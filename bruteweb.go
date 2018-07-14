@@ -18,7 +18,7 @@ type Config struct {
 
 var config Config
 
-func ParseCmdLine() {
+func parseCmdLine() {
 	flag.StringVar(&config.url, "u", "", "Base URL (e.g., https://example.com:8443/dir/)")
 	flag.BoolVar(&config.recursive, "r", false, "Recurse into subdirectories")
 	flag.IntVar(&config.numThreads, "t", 4, "Number of worker threads")
@@ -41,8 +41,9 @@ func ParseCmdLine() {
 }
 
 func main() {
-	ParseCmdLine()
+	parseCmdLine()
 
+	// properly handle redirs and SSL cert verification errors
 	config.httpClient = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
@@ -64,14 +65,14 @@ func main() {
 		words := make(chan string, config.numThreads)
 		results := make(chan *Url)
 
-		var wg_producers sync.WaitGroup
-		var wg_consumers sync.WaitGroup
-		wg_producers.Add(config.numThreads)
-		wg_consumers.Add(1)
+		var wgProducers sync.WaitGroup
+		var wgConsumers sync.WaitGroup
+		wgProducers.Add(config.numThreads)
+		wgConsumers.Add(1)
 
 		for i := 0; i < config.numThreads; i++ {
 			go func() {
-				defer wg_producers.Done()
+				defer wgProducers.Done()
 				for {
 					word := <-words
 					if word == "" {
@@ -90,9 +91,9 @@ func main() {
 		}
 
 		go func() {
-			defer wg_consumers.Done()
+			defer wgConsumers.Done()
 			for result := range results {
-				print_status(result)
+				printStatus(result)
 				if result.statusCode != http.StatusNotFound {
 					result.Report()
 				}
@@ -108,14 +109,14 @@ func main() {
 		}
 
 		close(words)
-		wg_producers.Wait()
+		wgProducers.Wait()
 		close(results)
-		wg_consumers.Wait()
+		wgConsumers.Wait()
 	}
 
 	fmt.Println("\r" + CLEAR_EOL)
 }
 
-func print_status(u *Url) {
+func printStatus(u *Url) {
 	fmt.Print("\r" + u.Flatten() + CLEAR_EOL)
 }
