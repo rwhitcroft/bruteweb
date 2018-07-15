@@ -14,10 +14,15 @@ type Config struct {
 	numThreads  int
 	recursive   bool
 	url         string
+	userAgent   string
+	verb        string
 }
 
 func initConfig() {
+	// sane defaults
 	config.ignoreCodes = []int{404}
+	config.userAgent = "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)"
+	config.verb = "GET"
 
 	// properly handle redirs and SSL cert verification errors
 	config.httpClient = &http.Client{

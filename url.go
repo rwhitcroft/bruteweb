@@ -36,13 +36,13 @@ func (u *Url) Clone(dir string) *Url {
 }
 
 func (u *Url) Fetch() {
-	req, err := http.NewRequest("GET", u.ToString(), nil)
+	req, err := http.NewRequest(config.verb, u.ToString(), nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)")
+	req.Header.Set("User-Agent", config.userAgent)
 
 	resp, err := config.httpClient.Do(req)
 	if err != nil {
