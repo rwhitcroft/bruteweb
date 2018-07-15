@@ -13,7 +13,7 @@ func main() {
 	parseCmdLine()
 
 	var urls []*Url
-	urls = append(urls, ParseURL(config.url))
+	urls = append(urls, parseUrl(config.url))
 
 	for len(urls) > 0 {
 		base := urls[0]

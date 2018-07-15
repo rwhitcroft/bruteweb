@@ -100,7 +100,7 @@ func NewUrl(proto string, fqdn string, port int, path []string) *Url {
 	return &Url{proto: proto, fqdn: fqdn, port: port, path: path}
 }
 
-func ParseURL(url string) *Url {
+func parseUrl(url string) *Url {
 	re := regexp.MustCompile(`^(https?)://([0-9A-Za-z-.]+?)(:\d+)?(/.*)?$`)
 	match := re.FindStringSubmatch(url)
 	if match == nil {
