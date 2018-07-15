@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"sync"
@@ -10,17 +9,8 @@ import (
 var config Config
 
 func main() {
+	initConfig()
 	parseCmdLine()
-
-	// properly handle redirs and SSL cert verification errors
-	config.httpClient = &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
 
 	var urls []*Url
 	urls = append(urls, ParseURL(config.url))
