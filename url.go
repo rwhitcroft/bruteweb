@@ -36,7 +36,7 @@ func (u *Url) Clone(dir string) *Url {
 }
 
 func (u *Url) Fetch() {
-	req, err := http.NewRequest("GET", u.toString(), nil)
+	req, err := http.NewRequest("GET", u.ToString(), nil)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -74,10 +74,10 @@ func (u *Url) Report() {
 		location = " -> " + u.location
 	}
 
-	fmt.Println("\r" + color + strconv.Itoa(u.statusCode) + " " + COLOR_RESET + u.toString() + location + CLEAR_EOL)
+	fmt.Println("\r" + color + strconv.Itoa(u.statusCode) + " " + COLOR_RESET + u.ToString() + location + CLEAR_EOL)
 }
 
-func (u *Url) toString() string {
+func (u *Url) ToString() string {
 	port := ":" + strconv.Itoa(u.port)
 	if (u.proto == "http" && u.port == 80) || (u.proto == "https" && u.port == 443) {
 		port = ""
