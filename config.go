@@ -19,15 +19,15 @@ type Config struct {
 func initConfig() {
 	config.ignoreCodes = []int{404}
 
-    // properly handle redirs and SSL cert verification errors
-    config.httpClient = &http.Client{
-        CheckRedirect: func(req *http.Request, via []*http.Request) error {
-            return http.ErrUseLastResponse
-        },
-        Transport: &http.Transport{
-            TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-        },
-    }
+	// properly handle redirs and SSL cert verification errors
+	config.httpClient = &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
 }
 
 func parseCmdLine() {

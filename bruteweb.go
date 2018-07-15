@@ -19,7 +19,7 @@ func main() {
 		base := urls[0]
 		urls = urls[1:]
 
-		fmt.Println("Scanning base URL:", base.ToString())
+		fmt.Println("Scanning base URL:", base.toString())
 
 		words := make(chan string, config.numThreads)
 		results := make(chan *Url)
@@ -77,5 +77,5 @@ func main() {
 }
 
 func printStatus(u *Url) {
-	fmt.Print("\r" + u.ToString() + CLEAR_EOL)
+	fmt.Print("\r" + u.toString() + CLEAR_EOL)
 }
