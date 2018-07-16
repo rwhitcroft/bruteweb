@@ -55,7 +55,7 @@ func main() {
 			defer wgConsumers.Done()
 			for result := range results {
 				printStatus(result)
-				if result.statusCode != http.StatusNotFound {
+				if !codeIsIgnored(result.statusCode) {
 					result.Report()
 				}
 
@@ -76,6 +76,15 @@ func main() {
 	}
 
 	fmt.Println("\r" + CLEAR_EOL)
+}
+
+func codeIsIgnored(code int) bool {
+	for _, v := range config.ignoreCodes {
+		if v == code {
+			return true
+		}
+	}
+	return false
 }
 
 func printStatus(u *Url) {
