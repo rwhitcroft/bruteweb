@@ -15,14 +15,14 @@ type Config struct {
 	recursive   bool
 	url         string
 	userAgent   string
-	verb        string
+	method        string
 }
 
 func initConfig() {
 	// sane defaults
 	config.ignoreCodes = []int{404}
 	config.userAgent = "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)"
-	config.verb = "GET"
+	config.method = "GET"
 
 	// properly handle redirs and SSL cert verification errors
 	config.httpClient = &http.Client{
@@ -36,9 +36,11 @@ func initConfig() {
 }
 
 func parseCmdLine() {
-	flag.StringVar(&config.url, "u", "", "Base URL (e.g., https://example.com:8443/dir/)")
+	flag.StringVar(&config.userAgent, "a", config.userAgent, "Set User-Agent string")
+	flag.StringVar(&config.method, "m", config.method, "HTTP method (e.g., GET, HEAD)")
 	flag.BoolVar(&config.recursive, "r", false, "Recurse into subdirectories")
 	flag.IntVar(&config.numThreads, "t", 4, "Number of worker threads")
+	flag.StringVar(&config.url, "u", "", "Base URL (e.g., https://example.com:8443/dir/)")
 	flag.StringVar(&config.extension, "x", "", "Add this file extension to all guesses")
 	flag.Parse()
 

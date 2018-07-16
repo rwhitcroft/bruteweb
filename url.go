@@ -36,7 +36,7 @@ func (u *Url) Clone(dir string) *Url {
 }
 
 func (u *Url) Fetch() {
-	req, err := http.NewRequest(config.verb, u.ToString(), nil)
+	req, err := http.NewRequest(config.method, u.ToString(), nil)
 	if err != nil {
 		fmt.Println(err)
 		return
