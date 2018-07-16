@@ -12,8 +12,6 @@ func main() {
 	initConfig()
 	parseCmdLine()
 
-	fmt.Println(config)
-
 	var urls []*Url
 	urls = append(urls, parseUrl(config.url))
 
