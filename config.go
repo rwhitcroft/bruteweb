@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -38,7 +40,10 @@ func initConfig() {
 }
 
 func parseCmdLine() {
+	var ignoreCodes string
+
 	flag.StringVar(&config.userAgent, "a", config.userAgent, "Set User-Agent string")
+	flag.StringVar(&ignoreCodes, "i", "", "Ignore specified status codes, comma-sep (e.g., 403,404,500)")
 	flag.StringVar(&config.method, "m", config.method, "HTTP method (e.g., GET, HEAD)")
 	flag.BoolVar(&config.recursive, "r", config.recursive, "Recurse into subdirectories")
 	flag.IntVar(&config.numThreads, "t", config.numThreads, "Number of worker threads")
@@ -59,4 +64,28 @@ func parseCmdLine() {
 	if config.extension != "" && config.extension[0] == '.' {
 		config.extension = config.extension[1:]
 	}
+
+	if len(ignoreCodes) > 0 {
+		parseIgnoreCodes(ignoreCodes)
+	}
+}
+
+func parseIgnoreCodes(input string) {
+    codes := strings.Split(input, ",")
+    for _, v := range codes {
+        if num, err := strconv.Atoi(v); err == nil {
+            config.ignoreCodes = appendIfUnique(config.ignoreCodes, num)
+        } else {
+            fmt.Println("Ignoring invalid status code:", v)
+        }
+    }
+}
+
+func appendIfUnique(slice []int, i int) []int {
+    for _, ele := range slice {
+        if ele == i {
+            return slice
+        }
+    }
+    return append(slice, i)
 }
