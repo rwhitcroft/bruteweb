@@ -15,7 +15,7 @@ type Config struct {
 	recursive   bool
 	url         string
 	userAgent   string
-	method        string
+	method      string
 }
 
 func initConfig() {
