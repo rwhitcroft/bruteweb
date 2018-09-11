@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -44,7 +45,10 @@ func main() {
 
 					url := base.Clone(word)
 					url.Fetch()
-					results <- url
+
+					if !strings.Contains(url.body, config.ignoreBody) {
+						results <- url
+					}
 				}
 			}()
 		}

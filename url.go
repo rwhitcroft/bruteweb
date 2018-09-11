@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -23,6 +24,7 @@ type Url struct {
 	port       int
 	proto      string
 	statusCode int
+	body       string
 }
 
 func (u *Url) AddPathItem(dir string) {
@@ -51,6 +53,13 @@ func (u *Url) Fetch() {
 	}
 	defer resp.Body.Close()
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	u.body = string(body)
 	u.statusCode = resp.StatusCode
 	if u.statusCode == http.StatusFound || u.statusCode == http.StatusMovedPermanently {
 		u.location = resp.Header["Location"][0]

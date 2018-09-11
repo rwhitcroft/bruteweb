@@ -13,6 +13,7 @@ type Config struct {
 	extension   string
 	httpClient  *http.Client
 	ignoreCodes []int
+	ignoreBody  string
 	method      string
 	numThreads  int
 	recursive   bool
@@ -44,6 +45,7 @@ func parseCmdLine() {
 
 	flag.StringVar(&config.userAgent, "a", config.userAgent, "Set User-Agent string")
 	flag.StringVar(&ignoreCodes, "i", "", "Ignore specified status codes, comma-sep (e.g., 403,404,500)")
+	flag.StringVar(&config.ignoreBody, "b", "", "Ignore specified string in <body>")
 	flag.StringVar(&config.method, "m", config.method, "HTTP method (e.g., GET, HEAD)")
 	flag.BoolVar(&config.recursive, "r", config.recursive, "Recurse into subdirectories")
 	flag.IntVar(&config.numThreads, "t", config.numThreads, "Number of worker threads")
@@ -71,21 +73,21 @@ func parseCmdLine() {
 }
 
 func parseIgnoreCodes(input string) {
-    codes := strings.Split(input, ",")
-    for _, v := range codes {
-        if num, err := strconv.Atoi(v); err == nil {
-            config.ignoreCodes = appendIfUnique(config.ignoreCodes, num)
-        } else {
-            fmt.Println("Ignoring invalid status code:", v)
-        }
-    }
+	codes := strings.Split(input, ",")
+	for _, v := range codes {
+		if num, err := strconv.Atoi(v); err == nil {
+			config.ignoreCodes = appendIfUnique(config.ignoreCodes, num)
+		} else {
+			fmt.Println("Ignoring invalid status code:", v)
+		}
+	}
 }
 
 func appendIfUnique(slice []int, i int) []int {
-    for _, ele := range slice {
-        if ele == i {
-            return slice
-        }
-    }
-    return append(slice, i)
+	for _, ele := range slice {
+		if ele == i {
+			return slice
+		}
+	}
+	return append(slice, i)
 }
